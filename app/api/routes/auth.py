@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from fastapi import Request
+from typing import Optional
 
 router = APIRouter()
 
@@ -12,22 +13,33 @@ class OAuthSigninRequest(BaseModel):
     last_name: str | None = None
     provider: str
 
+class EmailSigninRequest(BaseModel):
+    user_id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+    provider: str = "email"
 
 @router.post("/email")
-async def email_signin(payload: dict):
+async def email_signin(payload: EmailSigninRequest):
     print("=" * 50)
     print("EMAIL SIGNIN")
-    print("User ID:", payload.get("user_id"))
-    print("Email:", payload.get("email"))
-    print("Provider:", payload.get("provider"))
+    print("User ID:", payload.user_id)
+    print("Email:", payload.email)
+    print("Full Name:", payload.full_name)
+    print("Provider:", payload.provider)
     print("=" * 50)
 
-    # same logic as OAuth:
-    # - check if user exists
-    # - create if not
-    # - link supabase_user_id
+    # 🔒 SAME LOGIC AS OAUTH
+    # 1. user = get_user_by_supabase_id(payload.user_id)
+    # 2. if not exists -> create user
+    # 3. else -> update last_login
+    # 4. provider = "email"
 
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "user_id": payload.user_id,
+        "provider": payload.provider,
+    }
 
 
 @router.post("/oauth")
