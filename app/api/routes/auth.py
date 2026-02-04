@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from fastapi import Request
 from typing import Optional
+from app.services.user_service import upsert_user
 
 router = APIRouter()
 
@@ -29,17 +30,22 @@ async def email_signin(payload: EmailSigninRequest):
     print("Provider:", payload.provider)
     print("=" * 50)
 
-    # 🔒 SAME LOGIC AS OAUTH
-    # 1. user = get_user_by_supabase_id(payload.user_id)
-    # 2. if not exists -> create user
-    # 3. else -> update last_login
-    # 4. provider = "email"
+    try:
+        user = upsert_user(
+            user_id=payload.user_id,
+            email=payload.email,
+            full_name=payload.full_name,
+        )
 
-    return {
-        "status": "ok",
-        "user_id": payload.user_id,
-        "provider": payload.provider,
-    }
+        return {
+            "status": "ok",
+            "provider": payload.provider,
+            "user": user,
+        }
+
+    except Exception as e:
+        print("❌ AUTH ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Auth failed")
 
 
 @router.post("/oauth")
@@ -53,14 +59,24 @@ async def oauth_signin(oauth_data: OAuthSigninRequest):
     print("Provider:", oauth_data.provider)
     print("=" * 50)
 
-    # TODO:
-    # 1. Check if user exists (by user_id)
-    # 2. If not -> create user
-    # 3. Return success
+    try:
+        full_name = " ".join(
+            name for name in [oauth_data.first_name, oauth_data.last_name] if name
+        )
 
-    return {
-        "status": "ok",
-        "message": "OAuth user accepted",
-        "user_id": oauth_data.user_id,
-    }
+        user = upsert_user(
+            user_id=oauth_data.user_id,
+            email=oauth_data.email,
+            full_name=full_name or None,
+        )
+
+        return {
+            "status": "ok",
+            "provider": oauth_data.provider,
+            "user": user,
+        }
+
+    except Exception as e:
+        print("❌ AUTH ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Auth failed")
 
