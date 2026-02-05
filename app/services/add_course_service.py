@@ -9,6 +9,8 @@ def create_course(
     purpose: str | None,
     status: str,
     priority: str,
+    projects_enabled: bool,
+    assignments_enabled: bool,
 ):
     try:
         response = (
@@ -21,6 +23,8 @@ def create_course(
                 "type": type,
                 "status": status,
                 "priority": priority,
+                "projects_enabled": projects_enabled,
+                "assignments_enabled": assignments_enabled,
                 "created_at": datetime.utcnow().isoformat(),
             })
             .execute()
