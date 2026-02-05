@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.routes import auth
+from app.api.routes import course
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -15,11 +16,12 @@ app.add_middleware(
 )
 
 # Include auth router
-app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(course.router, prefix="/course", tags=["course"])
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to FastAPI"}
+    return {"message": "Welcome to API.Bevenlee"}
 
 @app.get("/health")
 async def health_check():
