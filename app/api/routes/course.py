@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from app.services.add_course_service import create_course
 from app.services.get_course_service import get_courses_by_user
 from app.services.get_course_detail_service import get_course_detail
+from app.services.save_course_service import save_course
 
 router = APIRouter()
 
@@ -18,6 +19,45 @@ class CreateCourseRequest(BaseModel):
     projects_enabled: bool
     assignments_enabled: bool
 
+# ------------------- Pydantic Models -------------------
+class SubtopicPayload(BaseModel):
+    subtopic_id: Optional[str]
+    title: str
+    is_completed: bool
+    position: int
+
+class TopicPayload(BaseModel):
+    topic_id: Optional[str]
+    title: str
+    status: str
+    position: int
+    subtopics: List[SubtopicPayload] = []
+
+class ResourcePayload(BaseModel):
+    resource_id: Optional[str]
+    topic_id: Optional[str] = None
+    title: str
+    url: str
+
+class ProjectPayload(BaseModel):
+    project_id: Optional[str]
+    title: str
+    status: str
+    description: Optional[str] = None
+
+class AssignmentPayload(BaseModel):
+    assignment_id: Optional[str]
+    title: str
+    status: str
+    description: Optional[str] = None
+
+class CourseAggregatePayload(BaseModel):
+    course_id: str
+    course: dict
+    topics: List[TopicPayload] = []
+    resources: List[ResourcePayload] = []
+    projects: List[ProjectPayload] = []
+    assignments: List[AssignmentPayload] = []
 
 @router.post("")
 async def create_course_route(payload: CreateCourseRequest):
@@ -96,3 +136,16 @@ async def get_course_detail_route(course_id: str):
     except Exception as e:
         print("❌ COURSE DETAIL ERROR:", repr(e))
         raise HTTPException(status_code=500, detail="Failed to fetch course detail")
+
+@router.put("/save/{course_id}")
+async def save_course_route(course_id: str, payload: CourseAggregatePayload):
+    """
+    Save/update full course aggregate (course, topics, subtopics, resources, projects, assignments)
+    """
+    try:
+        save_course(course_id, payload.dict())
+        return {"status": "ok"}
+    except Exception as e:
+        print("❌ SAVE COURSE ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Failed to save course")
+
