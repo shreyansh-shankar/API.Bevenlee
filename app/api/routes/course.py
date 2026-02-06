@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, Literal
 from app.services.add_course_service import create_course
 from app.services.get_course_service import get_courses_by_user
+from app.services.get_course_detail_service import get_course_detail
 
 router = APIRouter()
 
@@ -70,3 +71,28 @@ async def get_courses_route(user_id: str):
     except Exception as e:
         print("❌ COURSE FETCH ERROR:", repr(e))
         raise HTTPException(status_code=500, detail="Failed to fetch courses")
+
+
+@router.get("/detail/{course_id}")
+async def get_course_detail_route(course_id: str):
+    print("=" * 50)
+    print("FETCH COURSE DETAIL REQUEST")
+    print("Course ID:", course_id)
+    print("=" * 50)
+
+    try:
+        course = get_course_detail(course_id)
+
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
+
+        return {
+            "status": "ok",
+            "course": course,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("❌ COURSE DETAIL ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Failed to fetch course detail")
