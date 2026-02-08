@@ -31,8 +31,8 @@ def save_course(course_id: str, payload: dict):
     # Delete removed topics
     to_delete = [tid for tid in existing_topic_ids if tid not in incoming_topic_ids]
     if to_delete:
-        supabase.table("topics").delete().in_("topic_id", to_delete).execute()
         supabase.table("subtopics").delete().in_("topic_id", to_delete).execute()
+        supabase.table("topics").delete().in_("topic_id", to_delete).execute()
 
     for t in topics:
         topic_id = t.get("topic_id") or generate_id()
