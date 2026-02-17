@@ -5,6 +5,9 @@ from app.services.add_course_service import create_course
 from app.services.get_course_service import get_courses_by_user
 from app.services.get_course_detail_service import get_course_detail
 from app.services.save_course_service import save_course
+from app.services.update_course_service import update_course
+from app.services.delete_course_service import delete_course
+
 
 router = APIRouter()
 
@@ -59,6 +62,15 @@ class CourseAggregatePayload(BaseModel):
     projects: List[ProjectPayload] = []
     assignments: List[AssignmentPayload] = []
 
+class UpdateCourseRequest(BaseModel):
+    title: Optional[str] = None
+    type: Optional[str] = None
+    purpose: Optional[str] = None
+    status: Optional[Literal["planned", "active", "paused", "completed"]] = None
+    priority: Optional[Literal["low", "medium", "high"]] = None
+    projects_enabled: Optional[bool] = None
+    assignments_enabled: Optional[bool] = None
+
 @router.post("")
 async def create_course_route(payload: CreateCourseRequest):
     print("=" * 50)
@@ -92,6 +104,45 @@ async def create_course_route(payload: CreateCourseRequest):
     except Exception as e:
         print("❌ COURSE CREATE ERROR:", repr(e))
         raise HTTPException(status_code=500, detail="Failed to create course")
+
+@router.put("/{course_id}")
+async def update_course_route(course_id: str, payload: UpdateCourseRequest):
+    print("=" * 50)
+    print("UPDATE COURSE REQUEST")
+    print("Course ID:", course_id)
+    print("Updates:", payload.dict(exclude_none=True))
+    print("=" * 50)
+
+    try:
+        updated = update_course(course_id, payload.dict(exclude_none=True))
+
+        return {
+            "status": "ok",
+            "updated": updated,
+        }
+
+    except Exception as e:
+        print("❌ COURSE UPDATE ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Failed to update course")
+
+@router.delete("/{course_id}")
+async def delete_course_route(course_id: str):
+    print("=" * 50)
+    print("DELETE COURSE REQUEST")
+    print("Course ID:", course_id)
+    print("=" * 50)
+
+    try:
+        delete_course(course_id)
+
+        return {
+            "status": "ok",
+            "message": "Course deleted successfully",
+        }
+
+    except Exception as e:
+        print("❌ COURSE DELETE ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail="Failed to delete course")
 
 @router.get("/{user_id}")
 async def get_courses_route(user_id: str):
