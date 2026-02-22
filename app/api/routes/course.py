@@ -7,7 +7,7 @@ from app.services.get_course_detail_service import get_course_detail
 from app.services.save_course_service import save_course
 from app.services.update_course_service import update_course
 from app.services.delete_course_service import delete_course
-
+from app.core.exceptions import PlanLimitExceeded
 
 router = APIRouter()
 
@@ -73,17 +73,6 @@ class UpdateCourseRequest(BaseModel):
 
 @router.post("")
 async def create_course_route(payload: CreateCourseRequest):
-    print("=" * 50)
-    print("CREATE COURSE REQUEST")
-    print("User ID:", payload.user_id)
-    print("Title:", payload.title)
-    print("Type:", payload.type)
-    print("Status:", payload.status)
-    print("Priority:", payload.priority)
-    print("Projects Enabled:", payload.projects_enabled)
-    print("Assignments Enabled:", payload.assignments_enabled)
-    print("=" * 50)
-
     try:
         course = create_course(
             user_id=payload.user_id,
@@ -95,15 +84,27 @@ async def create_course_route(payload: CreateCourseRequest):
             projects_enabled=payload.projects_enabled,
             assignments_enabled=payload.assignments_enabled
         )
-
         return {
             "status": "ok",
             "course": course,
         }
-
+    except PlanLimitExceeded as e:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "PLAN_LIMIT_EXCEEDED",
+                "message": str(e)
+            }
+        )
     except Exception as e:
         print("❌ COURSE CREATE ERROR:", repr(e))
-        raise HTTPException(status_code=500, detail="Failed to create course")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "COURSE_CREATE_FAILED",
+                "message": "Failed to create course"
+            }
+        )
 
 @router.put("/{course_id}")
 async def update_course_route(course_id: str, payload: UpdateCourseRequest):
