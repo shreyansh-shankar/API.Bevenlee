@@ -13,10 +13,7 @@ def get_user_plan(user_id: str) -> int:
         .execute()
     )
 
-    if not response.data:
-        return 0
-
-    return response.data["subscribed_plan"]
+    return response.data["subscribed_plan"] if response.data else FREE
 
 
 def get_course_count(user_id: str) -> int:
@@ -41,6 +38,39 @@ def create_course(
     projects_enabled: bool,
     assignments_enabled: bool,
 ):
+    # ✅ get user plan
+    plan_id = get_user_plan(user_id)
+
+    # ✅ get plan limits
+    limits = get_plan_limits(plan_id)
+
+    # ✅ count courses
+    current_count = get_course_count(user_id)
+    max_courses = limits["max_courses"]
+
+    if max_courses != -1 and current_count >= max_courses:
+        raise PlanLimitExceeded(
+            f"You have reached the limit of {max_courses} courses for the {limits['name']} plan."
+        )
+
+    response = (
+        supabase
+        .table("courses")
+        .insert({
+            "user_id": user_id,
+            "title": title,
+            "purpose": purpose,
+            "type": type,
+            "status": status,
+            "priority": priority,
+            "projects_enabled": projects_enabled,
+            "assignments_enabled": assignments_enabled,
+            "created_at": datetime.utcnow().isoformat(),
+        })
+        .execute()
+    )
+
+    return response.data
     # ✅ get user plan
     plan_id = get_user_plan(user_id)
 

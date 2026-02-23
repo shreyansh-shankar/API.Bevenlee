@@ -8,6 +8,8 @@ from app.services.save_course_service import save_course
 from app.services.update_course_service import update_course
 from app.services.delete_course_service import delete_course
 from app.core.exceptions import PlanLimitExceeded
+from app.core.enforce_topic_limit import enforce_topic_limit
+from app.services.add_course_service import get_user_plan
 
 router = APIRouter()
 
@@ -55,6 +57,7 @@ class AssignmentPayload(BaseModel):
     description: Optional[str] = None
 
 class CourseAggregatePayload(BaseModel):
+    user_id: str
     course_id: str
     course: dict
     topics: List[TopicPayload] = []
@@ -191,12 +194,20 @@ async def get_course_detail_route(course_id: str):
 
 @router.put("/save/{course_id}")
 async def save_course_route(course_id: str, payload: CourseAggregatePayload):
-    """
-    Save/update full course aggregate (course, topics, subtopics, resources, projects, assignments)
-    """
     try:
+        # ✅ get user's plan id
+        plan_id = get_user_plan(payload.user_id)
+
+        # ✅ enforce topic limits
+        enforce_topic_limit(plan_id, payload.topics)
+
         save_course(course_id, payload.dict())
+
         return {"status": "ok"}
+
+    except HTTPException:
+        raise
+
     except Exception as e:
         print("❌ SAVE COURSE ERROR:", repr(e))
         raise HTTPException(status_code=500, detail="Failed to save course")

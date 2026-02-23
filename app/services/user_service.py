@@ -52,15 +52,3 @@ def upsert_user(
     except Exception as e:
         # Supabase throws real errors here
         raise Exception(f"Supabase operation failed: {e}")
-
-def get_user_plan(user_id: str):
-    response = (
-        supabase
-        .table("users")
-        .select("subscribed_plan")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
-    )
-
-    return response.data["subscribed_plan"]

@@ -10,11 +10,6 @@ class PlanRequest(BaseModel):
 
 @router.post("")
 async def get_plan(payload: PlanRequest):
-    print("=" * 50)
-    print("PLAN FETCH REQUEST")
-    print("User ID:", payload.user_id)
-    print("=" * 50)
-
     try:
         plan_id = get_user_plan(payload.user_id)
         limits = get_plan_limits(plan_id)
