@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.api.routes import auth
 from app.api.routes import course
 from app.api.routes import user
+from app.api.routes import billing
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -20,6 +21,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(course.router, prefix="/course", tags=["course"])
 app.include_router(user.router, prefix="", tags=["user"])
+app.include_router(billing.router, prefix="/billing", tags=["billing"])
 
 @app.get("/")
 async def root():

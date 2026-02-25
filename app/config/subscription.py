@@ -20,3 +20,23 @@ PLAN_LIMITS = {
         "max_topics_per_course": -1
     },
 }
+
+PLAN_PRICING = {
+    FREE: {
+        "monthly": 0,
+        "yearly": 0,
+    },
+    PRO: {
+        "monthly": 199,
+        "yearly": 1999,  # discount
+    },
+    PREMIUM: {
+        "monthly": 399,
+        "yearly": 3999,
+    },
+}
+
+PLAN_DURATIONS = {
+    "monthly": 30,
+    "yearly": 365,
+}
