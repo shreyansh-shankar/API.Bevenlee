@@ -10,6 +10,17 @@ class Settings(BaseSettings):
     SUPABASE_PROJECT_URL: str
     SUPABASE_ANON_KEY: str
     SUPABASE_SERVICE_ROLE_KEY: str
+
+    # Creem configuration
+    CREEM_API_KEY: str
+    CREEM_WEBHOOK_SECRET: str
+    CREEM_TEST_MODE: bool = True
+    CREEM_API_BASE: str = "https://test-api.creem.io"
+    CREEM_PRODUCT_ID_PRO_MONTHLY: str
+    CREEM_PRODUCT_ID_PRO_YEARLY: str
+    CREEM_PRODUCT_ID_PREMIUM_MONTHLY: str
+    CREEM_PRODUCT_ID_PREMIUM_YEARLY: str
+    APP_URL: str
     
     class Config:
         env_file = ".env"

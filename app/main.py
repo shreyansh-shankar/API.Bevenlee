@@ -5,8 +5,11 @@ from app.api.routes import auth
 from app.api.routes import course
 from app.api.routes import user
 from app.api.routes import billing
+from app.config.subscription import init_creem_product_map
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+init_creem_product_map()
 
 # CORS configuration for Next.js frontend
 app.add_middleware(
