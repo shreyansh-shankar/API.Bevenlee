@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.routes import auth
 from app.api.routes import course
-from app.api.routes import plan
+from app.api.routes import user
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -19,7 +19,7 @@ app.add_middleware(
 # Include auth router
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(course.router, prefix="/course", tags=["course"])
-app.include_router(plan.router, prefix="/plan", tags=["plan"])
+app.include_router(user.router, prefix="", tags=["user"])
 
 @app.get("/")
 async def root():
