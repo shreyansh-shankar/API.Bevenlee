@@ -170,7 +170,7 @@ async def get_courses_route(user_id: str, user=Depends(verify_token)):
 
 
 @router.get("/detail/{course_id}")
-async def get_course_detail_route(course_id: str):
+async def get_course_detail_route(course_id: str, user=Depends(verify_token)):
     print("=" * 50)
     print("FETCH COURSE DETAIL REQUEST")
     print("Course ID:", course_id)
@@ -194,7 +194,7 @@ async def get_course_detail_route(course_id: str):
         raise HTTPException(status_code=500, detail="Failed to fetch course detail")
 
 @router.put("/save/{course_id}")
-async def save_course_route(course_id: str, payload: CourseAggregatePayload):
+async def save_course_route(course_id: str, payload: CourseAggregatePayload, user=Depends(verify_token)):
     try:
         # ✅ get user's plan id
         plan_id = get_user_plan(payload.user_id)

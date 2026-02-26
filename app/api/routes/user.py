@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from app.core.auth import verify_token
 from pydantic import BaseModel
 from app.services.subscription_service import get_plan_limits
 from app.services.add_course_service import get_user_plan
@@ -18,7 +19,7 @@ class PlanRequest(BaseModel):
 # =========================
 
 @router.post("/plan")
-async def get_plan(payload: PlanRequest):
+async def get_plan(payload: PlanRequest, user=Depends(verify_token)):
     try:
         plan_id = get_user_plan(payload.user_id)
         limits = get_plan_limits(plan_id)
@@ -47,7 +48,7 @@ class ProfileUpdate(BaseModel):
 # =========================
 
 @router.get("/profile/{user_id}")
-async def fetch_profile(user_id: str):
+async def fetch_profile(user_id: str, user=Depends(verify_token)):
     try:
         profile = get_user_profile(user_id)
 
@@ -65,7 +66,7 @@ async def fetch_profile(user_id: str):
 # =========================
 
 @router.put("/profile")
-async def update_profile(payload: ProfileUpdate):
+async def update_profile(payload: ProfileUpdate, user=Depends(verify_token)):
     try:
         updated = update_user_profile(
             payload.user_id,
