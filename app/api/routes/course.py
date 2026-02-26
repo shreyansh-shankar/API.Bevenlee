@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from app.core.auth import verify_token
 from pydantic import BaseModel
 from typing import Optional, Literal, List
 from app.services.add_course_service import create_course
@@ -75,7 +76,7 @@ class UpdateCourseRequest(BaseModel):
     assignments_enabled: Optional[bool] = None
 
 @router.post("")
-async def create_course_route(payload: CreateCourseRequest):
+async def create_course_route(payload: CreateCourseRequest, user=Depends(verify_token)):
     try:
         course = create_course(
             user_id=payload.user_id,
@@ -110,7 +111,7 @@ async def create_course_route(payload: CreateCourseRequest):
         )
 
 @router.put("/{course_id}")
-async def update_course_route(course_id: str, payload: UpdateCourseRequest):
+async def update_course_route(course_id: str, payload: UpdateCourseRequest, user=Depends(verify_token)):
     print("=" * 50)
     print("UPDATE COURSE REQUEST")
     print("Course ID:", course_id)
@@ -130,7 +131,7 @@ async def update_course_route(course_id: str, payload: UpdateCourseRequest):
         raise HTTPException(status_code=500, detail="Failed to update course")
 
 @router.delete("/{course_id}")
-async def delete_course_route(course_id: str):
+async def delete_course_route(course_id: str, user=Depends(verify_token)):
     print("=" * 50)
     print("DELETE COURSE REQUEST")
     print("Course ID:", course_id)
@@ -149,7 +150,7 @@ async def delete_course_route(course_id: str):
         raise HTTPException(status_code=500, detail="Failed to delete course")
 
 @router.get("/{user_id}")
-async def get_courses_route(user_id: str):
+async def get_courses_route(user_id: str, user=Depends(verify_token)):
     print("=" * 50)
     print("FETCH COURSES REQUEST")
     print("User ID:", user_id)
