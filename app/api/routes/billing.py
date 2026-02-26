@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from datetime import datetime, timezone
 
-from app.services.billing_service import get_user_subscription, get_payment_history
+from app.services.billing_service import get_user_subscription, get_payment_history, mark_subscription_cancelled
 from app.services.creem_service import (
     create_checkout,
     cancel_subscription,
@@ -49,11 +49,19 @@ class CancelRequest(BaseModel):
 async def cancel(data: CancelRequest):
     try:
         result = cancel_subscription(data.subscription_id)
+
+        # Optimistic DB update — webhook will confirm, but this makes UI instant
+        sub = get_user_subscription(data.user_id)
+        if sub.get("plan_expires_at"):
+            expires = datetime.fromisoformat(sub["plan_expires_at"])
+        else:
+            expires = None
+        mark_subscription_cancelled(user_id=data.user_id, plan_expires_at=expires)
+
         return {"status": "ok", "result": result}
     except Exception as e:
         print("❌ CANCEL ERROR:", repr(e))
         raise HTTPException(status_code=500, detail="Failed to cancel subscription")
-
 
 # --------------------------------------------------
 # Upgrade / Downgrade Subscription
