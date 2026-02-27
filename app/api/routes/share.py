@@ -9,10 +9,10 @@ from app.services.accept_share_service import (
     ShareExpiredError,
     CourseLimitExceeded,
     TopicLimitExceeded,
+    PlanUpgradeRequired,
 )
 
 router = APIRouter()
-
 
 # ── Request models ──────────────────────────────────────────────────────────
 
@@ -68,7 +68,11 @@ async def accept_share_route(token: str, payload: AcceptShareRequest, user=Depen
             recipient_user_id=payload.user_id,
         )
         return result   # { "course_id": new_course_id }
-
+    except PlanUpgradeRequired as e:        # ← now correctly inside the function
+        raise HTTPException(
+            status_code=403,
+            detail={"error": str(e), "error_code": "PLAN_UPGRADE_REQUIRED"},
+        )
     except ShareExpiredError as e:
         raise HTTPException(
             status_code=410,
