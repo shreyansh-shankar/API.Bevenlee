@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import auth, course, user, billing, sessions
+from app.api.routes import auth, course, user, billing, sessions, share
 from app.config.subscription import init_creem_product_map
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -23,6 +23,7 @@ app.include_router(course.router, prefix="/course", tags=["course"])
 app.include_router(user.router, prefix="", tags=["user"])
 app.include_router(billing.router, prefix="/billing", tags=["billing"])
 app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
+app.include_router(share.router, prefix="/share", tags=["share"])
 
 @app.get("/")
 async def root():
