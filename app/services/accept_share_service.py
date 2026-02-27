@@ -58,6 +58,10 @@ def accept_share(token: str, recipient_user_id: str) -> dict:
     # ── 2. Plan checks for recipient ────────────────────────────────────────
     plan_id = get_user_plan(recipient_user_id)
 
+    # ← ADD THIS
+    if plan_id == 0:
+        raise PlanUpgradeRequired("Course sharing is only available on Pro and above")
+
     # Check course limit
     existing_courses = (
         supabase.table("courses")
