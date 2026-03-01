@@ -15,7 +15,6 @@ def get_session_stats(user_id: str, topic_id: str) -> dict:
     today = datetime.now(timezone.utc).date()
     today_minutes = sum(
         s["duration_minutes"] for s in sessions
-        if datetime.fromisoformat(s["started_at"]).astimezone(timezone.utc).date() == today
     )
 
     # Streak — consecutive days going backwards from today
