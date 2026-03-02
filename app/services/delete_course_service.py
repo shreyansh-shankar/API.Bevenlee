@@ -9,25 +9,32 @@ def delete_course(course_id: str):
             .eq("course_id", course_id)
             .execute()
         ).data or []
-
         topic_ids = [t["topic_id"] for t in topics]
 
         # 2. Delete subtopics
         if topic_ids:
             supabase.table("subtopics").delete().in_("topic_id", topic_ids).execute()
 
-        # 3. Delete topics
+        # 3. Delete whiteboards from storage
+        if topic_ids:
+            paths = [f"whiteboard-{tid}.json" for tid in topic_ids]
+            try:
+                supabase.storage.from_("whiteboards").remove(paths)
+            except Exception:
+                pass
+
+        # 4. Delete topics
         supabase.table("topics").delete().eq("course_id", course_id).execute()
 
-        # 4. Delete resources, projects, assignments
+        # 5. Delete resources, projects, assignments
         supabase.table("resources").delete().eq("course_id", course_id).execute()
         supabase.table("projects").delete().eq("course_id", course_id).execute()
         supabase.table("assignments").delete().eq("course_id", course_id).execute()
 
-        # 5. Delete course shares
+        # 6. Delete course shares
         supabase.table("course_shares").delete().eq("course_id", course_id).execute()
 
-        # 6. Finally delete the course
+        # 7. Finally delete the course
         supabase.table("courses").delete().eq("course_id", course_id).execute()
 
     except Exception as e:

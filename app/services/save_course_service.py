@@ -32,6 +32,14 @@ def save_course(course_id: str, payload: dict):
     to_delete = [tid for tid in existing_topic_ids if tid not in incoming_topic_ids]
     if to_delete:
         supabase.table("subtopics").delete().in_("topic_id", to_delete).execute()
+
+        # Delete whiteboards from storage for removed topics
+        paths = [f"whiteboard-{tid}.json" for tid in to_delete]
+        try:
+            supabase.storage.from_("whiteboards").remove(paths)
+        except Exception:
+            pass
+
         supabase.table("topics").delete().in_("topic_id", to_delete).execute()
 
     for t in topics:
