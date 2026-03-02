@@ -8,7 +8,7 @@ def generate_token() -> str:
     return secrets.token_urlsafe(18)
 
 
-def create_share(user_id: str, course_id: str, expiry: str) -> dict:
+def create_share(user_id: str, course_id: str, expiry: str, whiteboards: bool = False) -> dict:
     """
     Create a share link for a course.
     expiry: "never" | "7d" | "30d"
@@ -39,6 +39,7 @@ def create_share(user_id: str, course_id: str, expiry: str) -> dict:
         "created_by": user_id,
         "token": token,
         "expires_at": expires_at,
+        "whiteboards": whiteboards,
     }).execute()
 
     row = result.data[0]
@@ -46,4 +47,5 @@ def create_share(user_id: str, course_id: str, expiry: str) -> dict:
     return {
         "token": row["token"],
         "expires_at": row["expires_at"],
+        "whiteboards": row["whiteboards"],
     }

@@ -20,6 +20,7 @@ class CreateShareRequest(BaseModel):
     user_id: str
     course_id: str
     expiry: Literal["never", "7d", "30d"]
+    whiteboards: bool = False
 
 class AcceptShareRequest(BaseModel):
     user_id: str
@@ -34,6 +35,7 @@ async def create_share_route(payload: CreateShareRequest, user=Depends(verify_to
             user_id=payload.user_id,
             course_id=payload.course_id,
             expiry=payload.expiry,
+            whiteboards=payload.whiteboards,
         )
         return result
 

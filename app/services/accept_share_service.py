@@ -37,7 +37,7 @@ def accept_share(token: str, recipient_user_id: str) -> dict:
     # ── 1. Resolve the share token ──────────────────────────────────────────
     share = (
         supabase.table("course_shares")
-        .select("share_id, course_id, expires_at")
+        .select("share_id, course_id, expires_at, whiteboards")
         .eq("token", token)
         .single()
         .execute()
@@ -54,6 +54,7 @@ def accept_share(token: str, recipient_user_id: str) -> dict:
             raise ShareExpiredError("This share link has expired")
 
     source_course_id = row["course_id"]
+    clone_whiteboards = row["whiteboards"] 
 
     # ── 2. Plan checks for recipient ────────────────────────────────────────
     plan_id = get_user_plan(recipient_user_id)
@@ -201,22 +202,23 @@ def accept_share(token: str, recipient_user_id: str) -> dict:
         }).execute()
 
     # ── 8. Clone whiteboards from storage ───────────────────────────────────
-    for old_topic_id, new_topic_id in topic_id_map.items():
-        old_path = f"whiteboard-{old_topic_id}.json"
-        new_path = f"whiteboard-{new_topic_id}.json"
+    if clone_whiteboards:
+        for old_topic_id, new_topic_id in topic_id_map.items():
+            old_path = f"whiteboard-{old_topic_id}.json"
+            new_path = f"whiteboard-{new_topic_id}.json"
 
-        try:
-            # Download the source whiteboard
-            response = supabase.storage.from_("whiteboards").download(old_path)
-            if response:
-                # Upload under the new topic's path
-                supabase.storage.from_("whiteboards").upload(
-                    path=new_path,
-                    file=response,
-                    file_options={"content-type": "application/json", "upsert": "true"},
-                )
-        except Exception:
-            # Whiteboard may not exist for every topic — that's fine, skip silently
-            pass
+            try:
+                # Download the source whiteboard
+                response = supabase.storage.from_("whiteboards").download(old_path)
+                if response:
+                    # Upload under the new topic's path
+                    supabase.storage.from_("whiteboards").upload(
+                        path=new_path,
+                        file=response,
+                        file_options={"content-type": "application/json", "upsert": "true"},
+                    )
+            except Exception:
+                # Whiteboard may not exist for every topic — that's fine, skip silently
+                pass
 
     return {"course_id": new_course_id}
