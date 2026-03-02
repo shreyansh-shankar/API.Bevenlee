@@ -37,14 +37,14 @@ def get_roadmap_share_preview(token: str) -> dict | None:
 
     # Fetch creator display name
     creator = (
-        supabase.table("profiles")
-        .select("display_name")
+        supabase.table("users")
+        .select("full_name")
         .eq("user_id", row["created_by"])
         .single()
         .execute()
     ).data
 
-    created_by_name = (creator or {}).get("display_name", "Someone")
+    created_by_name = (creator or {}).get("full_name", "Someone")
 
     return {
         "roadmap_title": roadmap["title"],
