@@ -4,7 +4,7 @@ from typing import List
 class Settings(BaseSettings):
     PROJECT_NAME: str = "FastAPI Backend"
     API_V1_STR: str = "/api/v1"
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
+    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "https://bevenlee.vercel.app"]
     
     # Supabase configuration
     SUPABASE_PROJECT_URL: str
