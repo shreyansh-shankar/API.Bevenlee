@@ -1,5 +1,5 @@
 from app.core.supabase import supabase
-from app.config.is_admin import is_admin
+from app.config.admin import is_admin
 
 class NotOwnerError(Exception):
     pass
