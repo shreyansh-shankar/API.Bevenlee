@@ -1,6 +1,5 @@
 from app.core.supabase import supabase
-from app.core.config import settings
-
+from app.config.is_admin import is_admin
 
 class NotOwnerError(Exception):
     pass
@@ -23,7 +22,7 @@ def add_library_item(
     - Denormalises title + description for fast list queries.
     """
 
-    is_admin = user_id in settings.ADMIN_USER_IDS
+    admin_pick = is_admin(user_id)
 
     if item_type == "course":
         source = (
@@ -66,7 +65,7 @@ def add_library_item(
             "item_type": item_type,
             "source_id": source_id,
             "added_by": user_id,
-            "is_admin_pick": is_admin,
+            "is_admin_pick": admin_pick,
             "whiteboards": whiteboards,
             "title": title,
             "description": description,
